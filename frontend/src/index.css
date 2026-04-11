@@ -1,0 +1,153 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  body {
+    background-color: #FAFAF7;
+    color: #1A1916;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Clash Display', 'Instrument Sans', sans-serif;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #1A1916;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #F5F4EE; }
+  ::-webkit-scrollbar-thumb { background: #D8D5C4; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8E8A76; }
+
+  ::selection { background: #D8D5C4; color: #1A1916; }
+
+  input, textarea, select {
+    font-family: 'Instrument Sans', sans-serif;
+  }
+}
+
+@layer components {
+
+  /* ── Buttons ── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-body font-semibold
+           rounded-xl px-5 py-2.5 text-sm transition-all duration-150
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+  .btn-primary {
+    @apply btn bg-ink-900 text-sand-50 hover:bg-ink-700
+           focus-visible:ring-ink-800 shadow-card hover:shadow-lifted active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply btn bg-white text-ink-900 border border-sand-300 hover:bg-sand-100
+           focus-visible:ring-sand-400 shadow-card hover:shadow-lifted active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply btn text-ink-700 hover:bg-sand-100 focus-visible:ring-sand-300;
+  }
+  .btn-danger {
+    @apply btn bg-rose-light text-rose border border-rose/20 hover:bg-rose/10;
+  }
+  .btn-success {
+    @apply btn bg-leaf-light text-leaf border border-leaf/20 hover:bg-leaf/10;
+  }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full bg-white border border-sand-300 text-ink-900 placeholder-sand-400
+           rounded-xl px-4 py-3 text-sm font-body
+           focus:outline-none focus:border-ink-700 focus:ring-1 focus:ring-ink-700/20
+           transition-colors duration-150;
+  }
+  .label {
+    @apply block text-ink-800 text-xs font-semibold font-body uppercase tracking-wider mb-2;
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply bg-white rounded-2xl border border-sand-200 shadow-card p-6;
+  }
+  .card-hover {
+    @apply card hover:shadow-lifted hover:-translate-y-0.5 transition-all duration-200 cursor-pointer;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold font-body;
+  }
+  .badge-new      { @apply badge bg-sky-light     text-sky; }
+  .badge-learning { @apply badge bg-amber-light   text-amber; }
+  .badge-review   { @apply badge bg-violet-light  text-violet; }
+  .badge-mastered { @apply badge bg-leaf-light    text-leaf; }
+  .badge-due      { @apply badge bg-rose-light    text-rose; }
+
+  /* ── Progress bar ── */
+  .progress-track { @apply h-2 bg-sand-200 rounded-full overflow-hidden; }
+  .progress-fill  { @apply h-full rounded-full transition-all duration-700; }
+
+  /* ── Section heading ── */
+  .section-title { @apply font-display text-2xl font-semibold text-ink-900 tracking-tight; }
+  .section-sub   { @apply text-sand-500 text-sm font-body mt-1; }
+
+  /* ── Flip card ── */
+  .perspective     { perspective: 1000px; }
+  .flip-inner      { transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+  .flip-inner.flipped { transform: rotateY(180deg); }
+  .flip-face       { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .flip-back-face  { backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotateY(180deg); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    @apply flex flex-col items-center justify-center text-center py-16 px-6;
+  }
+  .empty-icon {
+    @apply w-14 h-14 rounded-2xl bg-sand-100 flex items-center justify-center mb-4 text-sand-400;
+  }
+}
+
+/* ── Dotted background pattern ── */
+.dot-bg {
+  background-image: radial-gradient(circle, #D8D5C4 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Grain texture overlay ── */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Upload drag-over ── */
+.drag-over {
+  border-color: #1A1916 !important;
+  background-color: #F5F4EE !important;
+  transform: scale(1.01);
+}
+
+/* Rating button row */
+.rating-btn {
+  @apply flex-1 py-3 rounded-xl text-sm font-semibold font-body border transition-all duration-150
+         hover:scale-[1.02] active:scale-[0.97];
+}
