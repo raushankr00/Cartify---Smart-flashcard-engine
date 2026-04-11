@@ -4,7 +4,7 @@ import { deckAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import {
   Upload, BookOpen, Flame, Play, Trash2,
-  Clock, CheckCircle, AlertCircle, Target, ChevronRight
+  Clock, CheckCircle, AlertCircle, Target, ChevronRight, Search, X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -90,6 +90,7 @@ export default function HomePage() {
   const { user } = useAuth()
   const [decks, setDecks]   = useState([])
   const [loading, setLoad]  = useState(true)
+  const [search, setSearch] = useState('')
 
   const load = () => {
     setLoad(true)
@@ -110,11 +111,16 @@ export default function HomePage() {
     } catch { toast.error('Delete failed') }
   }
 
+  // Filter decks by search query
+  const filtered = decks.filter(d =>
+    d.title.toLowerCase().includes(search.toLowerCase()) ||
+    d.sourceFile?.toLowerCase().includes(search.toLowerCase())
+  )
+
   // Summary stats
   const totalCards    = decks.reduce((s, d) => s + d.totalCards, 0)
   const totalMastered = decks.reduce((s, d) => s + d.masteredCards, 0)
   const totalDue      = decks.reduce((s, d) => s + d.dueCards, 0)
-  const overallPct    = totalCards > 0 ? Math.round(totalMastered / totalCards * 100) : 0
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -139,10 +145,10 @@ export default function HomePage() {
       {!loading && decks.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Decks',    value: decks.length,   icon: BookOpen,    color: 'text-sky',    bg: 'bg-sky-light' },
-            { label: 'Cards',    value: totalCards,      icon: Target,      color: 'text-violet', bg: 'bg-violet-light' },
-            { label: 'Mastered', value: totalMastered,   icon: CheckCircle, color: 'text-leaf',   bg: 'bg-leaf-light' },
-            { label: 'Due Today',value: totalDue,        icon: AlertCircle, color: 'text-amber',  bg: 'bg-amber-light' },
+            { label: 'Decks',     value: decks.length,   icon: BookOpen,    color: 'text-sky',    bg: 'bg-sky-light' },
+            { label: 'Cards',     value: totalCards,      icon: Target,      color: 'text-violet', bg: 'bg-violet-light' },
+            { label: 'Mastered',  value: totalMastered,   icon: CheckCircle, color: 'text-leaf',   bg: 'bg-leaf-light' },
+            { label: 'Due Today', value: totalDue,        icon: AlertCircle, color: 'text-amber',  bg: 'bg-amber-light' },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <div key={label} className="card py-4 px-5">
               <div className={`w-8 h-8 ${bg} rounded-xl flex items-center justify-center mb-2`}>
@@ -152,6 +158,28 @@ export default function HomePage() {
               <p className="text-sand-400 text-xs font-body mt-0.5">{label}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Search bar — only when there are decks */}
+      {!loading && decks.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-sand-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search decks..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="input pl-9 pr-9"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sand-400 hover:text-ink-700 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       )}
 
@@ -178,24 +206,45 @@ export default function HomePage() {
             <Upload size={15} /> Upload your first PDF
           </Link>
         </div>
+      ) : filtered.length === 0 ? (
+        /* No search results */
+        <div className="empty-state">
+          <div className="empty-icon"><Search size={24} /></div>
+          <h3 className="font-display font-semibold text-ink-900 text-lg">No decks found</h3>
+          <p className="text-sand-400 text-sm mt-1 mb-4">
+            No decks match "<span className="text-ink-700 font-medium">{search}</span>"
+          </p>
+          <button onClick={() => setSearch('')} className="btn-secondary">
+            <X size={14} /> Clear search
+          </button>
+        </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
-          {decks.map(deck => (
+          {filtered.map(deck => (
             <DeckCard key={deck._id} deck={deck} onDelete={handleDelete} />
           ))}
-          {/* Add card */}
-          <Link to="/upload"
-            className="card border-2 border-dashed border-sand-300 hover:border-sand-500
-                       bg-transparent hover:bg-white flex flex-col items-center justify-center
-                       gap-3 py-10 transition-all duration-200 group cursor-pointer">
-            <div className="w-10 h-10 rounded-xl bg-sand-100 group-hover:bg-sand-200 flex items-center justify-center transition-colors">
-              <Upload size={18} className="text-sand-400" />
-            </div>
-            <span className="text-sand-400 font-body font-medium text-sm group-hover:text-ink-700 transition-colors">
-              Add another deck
-            </span>
-          </Link>
+          {/* Add card — only show when not searching */}
+          {!search && (
+            <Link to="/upload"
+              className="card border-2 border-dashed border-sand-300 hover:border-sand-500
+                         bg-transparent hover:bg-white flex flex-col items-center justify-center
+                         gap-3 py-10 transition-all duration-200 group cursor-pointer">
+              <div className="w-10 h-10 rounded-xl bg-sand-100 group-hover:bg-sand-200 flex items-center justify-center transition-colors">
+                <Upload size={18} className="text-sand-400" />
+              </div>
+              <span className="text-sand-400 font-body font-medium text-sm group-hover:text-ink-700 transition-colors">
+                Add another deck
+              </span>
+            </Link>
+          )}
         </div>
+      )}
+
+      {/* Search result count */}
+      {search && filtered.length > 0 && (
+        <p className="text-sand-400 text-xs font-body -mt-4">
+          {filtered.length} of {decks.length} deck{decks.length > 1 ? 's' : ''} match "{search}"
+        </p>
       )}
     </div>
   )
