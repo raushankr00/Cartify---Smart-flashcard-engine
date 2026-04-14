@@ -14,27 +14,30 @@ const app = express()
 
 app.use(helmet())
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true)
-    
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, mobile apps)
+    if (!origin) return callback(null, true);
+
     const allowed = [
       process.env.FRONTEND_URL,
       'http://localhost:5173',
       'http://localhost:3000',
-    ].filter(Boolean)
+    ].filter(Boolean);
 
-    // Allow any vercel.app subdomain
-    if (origin.endsWith('.vercel.app') || allowed.includes(origin)) {
-      return callback(null, true)
+    // Allow all Vercel subdomains safely
+    if (
+      (origin && origin.endsWith('.vercel.app')) ||
+      allowed.includes(origin)
+    ) {
+      return callback(null, true);
     }
 
-    return callback(new Error('Not allowed by CORS'))
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}))
+}));
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 })
 const uploadLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, message: { error: 'Too many uploads. Please wait.' } })
