@@ -3,7 +3,6 @@ const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const rateLimit = require('express-rate-limit')
-const path = require('path')
 
 const authRoutes = require('./routes/auth.routes')
 const deckRoutes = require('./routes/deck.routes')
@@ -12,29 +11,29 @@ const errorHandler = require('./middleware/errorHandler')
 
 const app = express()
 
+app.set('trust proxy', 1)
 app.use(helmet())
-app.use(cors({
+
+const corsOptions = {
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true)
-    
     const allowed = [
       process.env.FRONTEND_URL,
       'http://localhost:5173',
       'http://localhost:3000',
     ].filter(Boolean)
-
-    // Allow any vercel.app subdomain
     if (origin.endsWith('.vercel.app') || allowed.includes(origin)) {
       return callback(null, true)
     }
-
     return callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}))
+}
+
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 })
 const uploadLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, message: { error: 'Too many uploads. Please wait.' } })
